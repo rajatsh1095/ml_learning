@@ -12,15 +12,16 @@ def causal_mask_misfire(scores: np.ndarray) -> np.ndarray:
     # TODO: mask with -inf BEFORE taking the row max, so forbidden entries
     # never influence the max-subtraction or the normalizer.
     
-    n = scores.shape[0]
-
-    for i in range(n):
-        scores[i, i+1:] = -np.inf
-
+    for i in range(scores.shape[0]):
+        for j in range(scores.shape[1]):
+            if j>i:
+                scores[i][j] = -np.inf
         max_score = np.max(scores[i])
-        exps = np.exp(scores[i] - max_score)
+        scores[i] = scores[i] - max_score
 
-        scores[i] = exps / np.sum(exps)
-
+        exps = np.exp(scores[i])
+        total = np.sum(exps)
+        print(exps, total)
+        scores[i] = exps/total
     return scores
     pass
